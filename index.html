@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* style.css */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .stopwatch {
+            margin: 50px auto;
+            width: 200px;
+        }
+
+        #display {
+            font-size: 36px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin: 5px;
+        }
+    </style>
+    <title>Stopwatch</title>
+</head>
+<body>
+    <div class="stopwatch">
+        <span id="display">00:00:00</span>
+        <button id="startStop">Start</button>
+        <button id="stop">Stop</button>
+        <button id="reset">Reset</button>
+        <button id="lap" disabled>Lap</button>
+        <ul id="lapList"></ul>
+    </div>
+    <script>
+        // script.js
+        let isRunning = false;
+        let isStopped = false;
+        let startTime;
+        let lapStartTime;
+        let interval;
+
+        const display = document.getElementById("display");
+        const startStopButton = document.getElementById("startStop");
+        const stopButton = document.getElementById("stop");
+        const resetButton = document.getElementById("reset");
+        const lapButton = document.getElementById("lap");
+        const lapList = document.getElementById("lapList");
+
+        startStopButton.addEventListener("click", () => {
+            if (!isRunning && !isStopped) {
+                startTime = Date.now() - (startTime || 0);
+                lapStartTime = Date.now() - (lapStartTime || 0);
+                interval = setInterval(updateDisplay, 10);
+                startStopButton.textContent = "Stop";
+                stopButton.textContent = "Stop";
+                lapButton.disabled = false;
+            } else if (isRunning) {
+                clearInterval(interval);
+                startStopButton.textContent = "Resume";
+                stopButton.textContent = "Stop";
+                lapButton.disabled = true;
+            } else {
+                startTime = Date.now() - (startTime || 0);
+                lapStartTime = Date.now() - (lapStartTime || 0);
+                interval = setInterval(updateDisplay, 10);
+                startStopButton.textContent = "Stop";
+                stopButton.textContent = "Stop";
+                lapButton.disabled = false;
+            }
+            isRunning = !isRunning;
+            isStopped = false;
+        });
+
+        stopButton.addEventListener("click", () => {
+            clearInterval(interval);
+            startStopButton.textContent = "Resume";
+            stopButton.textContent = "Stop";
+            isRunning = false;
+            isStopped = true;
+        });
+
+        resetButton.addEventListener("click", () => {
+            clearInterval(interval);
+            display.textContent = "00:00:00";
+            startStopButton.textContent = "Start";
+            stopButton.textContent = "Stop";
+            lapButton.disabled = true;
+            isRunning = false;
+            isStopped = false;
+            lapList.innerHTML = "";
+        });
+
+        lapButton.addEventListener("click", () => {
+            const lapTime = new Date(Date.now() - lapStartTime);
+            const lapMinutes = lapTime.getUTCMinutes();
+            const lapSeconds = lapTime.getUTCSeconds();
+            const lapMilliseconds = Math.floor(lapTime.getUTCMilliseconds() / 10);
+
+            // Create a new lap time element and append it to the lapList
+            const lapTimeElement = document.createElement("li");
+            lapTimeElement.textContent = `${String(lapMinutes).padStart(2, "0")}:${String(lapSeconds).padStart(2, "0")}:${String(lapMilliseconds).padStart(2, "0")}`;
+            lapList.appendChild(lapTimeElement);
+
+            // Update lapStartTime to the current time
+            lapStartTime = Date.now();
+        });
+
+        function updateDisplay() {
+            const currentTime = new Date(Date.now() - startTime);
+            const lapTime = new Date(Date.now() - lapStartTime);
+            const minutes = currentTime.getUTCMinutes();
+            const seconds = currentTime.getUTCSeconds();
+            const milliseconds = Math.floor(currentTime.getUTCMilliseconds() / 10);
+            const lapMinutes = lapTime.getUTCMinutes();
+            const lapSeconds = lapTime.getUTCSeconds();
+            const lapMilliseconds = Math.floor(lapTime.getUTCMilliseconds() / 10);
+
+            display.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}:${String(milliseconds).padStart(2, "0")}`;
+
+            // Display lap time
+            lapList.textContent = `${String(lapMinutes).padStart(2, "0")}:${String(lapSeconds).padStart(2, "0")}:${String(lapMilliseconds).padStart(2, "0")}`;
+        }
+    </script>
+</body>
+</html>
